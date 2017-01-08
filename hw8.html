@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script src="dirPagination.js"></script>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="https://use.fontawesome.com/2b5968a30a.js"></script>
+<!-- <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" /> -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="wrapper" ng-app="myTable" ng-controller="tableController">
+    <div class="header-wrapper navbar navbar-default navbar-fixed-top">
+            <a id="sidebar-toggle" style="float: left;"><i class="fa fa-bars"></i></a>
+            <a id="header-brand" href="http://sunlightfoundation.com/" target="_blank" ><img src="http://cs-server.usc.edu:45678/hw/hw8/images/logo.png" style="height: 20px;"><b>Congress API</b></a>
+    </div>
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+            <li ng-click="pages.legislators = true"><a href=""><i class="fa fa-user"></i><span class="nav-title">Legislators</span></a></li>
+            <li ng-click="pages.bills = true"><a href=""><i class="fa fa-file-o"></i><span class="nav-title">Bills</span></a></li>
+            <li ng-click="pages.committees = true"><a href=""><i class="fa fa-sign-in"></i><span class="nav-title">Committees</span></a></li>
+            <li ng-click="pages.favorites = true"><a href=""><i class="fa fa-star"></i><span class="nav-title">Favorites</span></a></li>
+        </ul>
+    </div>
+    <div id="page-content-wrapper" class="well" >
+    	<div  class="container-fluid">
+    		<h3>{{pageHeader}}</h3>
+    		<hr>
+            <div id="myCarousel" class="carousel slide" data-ride="carousel" data-wrap="false" data-interval="false" data-pause="true">
+                <!-- Wrapper for slides -->
+                <div class="carousel-inner" role="listbox">
+                    <div class="item active">
+                		<div class="box" ng-if="pages.legislators">
+                			<ul class="nav nav-tabs">
+                		  		<li class="active" ng-click="legisType.state = true" data-toggle="tab"><a href="">By State</a></li>
+                		  		<li ng-click="legisType.house = true" data-toggle="tab"><a href="">House</a></li>
+                		  		<li ng-click="legisType.senate = true" data-toggle="tab"><a href="">Senate</a></li>
+                			</ul>
+                			<div class="content">
+                				<div class="content-header">
+                					<form>
+                						<p class="col-xs-7 text-left">{{contentType.legislators}}</p>
+                						<div class="form-group col-xs-5 text-right">
+                							<input class="form-control" ng-if="!legisType.state" ng-model="keywords.legislators" placeholder="Search">
+                							<select class="form-control" ng-if="legisType.state" ng-model="states.selectedState" ng-change="keywords.legislators = states.selectedState">
+                								<option value="">All States</option>
+                								<option ng-repeat="state in states.availableStates" value="{{state.name}}">{{state.name}}</option>
+                							</select>
+                						</div>
+                					</form>
+                				</div>
+                				<div class="content-body col-xs-12">
+                					<div class="table-responsive">
+                						<table class=" table table-hover">
+                							<thead>
+                								<tr>
+                									<th>Party</th>
+                									<th>Name</th>
+                									<th>Chamber</th>
+                									<th ng-if="!legisType.senate">District</th>
+                									<th>State</th>
+                									<th></th>
+                								</tr>
+                							</thead>
+                							<tbody>
+                						  		<tr dir-paginate="item in legislators| filter: types.legislators | filter: keywords.legislators | orderBy: sorts.legislators | itemsPerPage: 10" current-page="currentPage">
+                						    		<td><img ng-src="{{item.party=='R'? 'http://cs-server.usc.edu:45678/hw/hw8/images/r.png':(item.party=='D'? 'http://cs-server.usc.edu:45678/hw/hw8/images/d.png' : 'http://independentamericanparty.org/wp-content/themes/v/images/logo-american-heritage-academy.png')}}" alt="NA"></td>
+                						    		<td>{{item.last_name}},&nbsp;{{item.first_name}}</td>
+                						    		<td><img ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{item.chamber == 'house'? 'h.png': 's.svg'}}" alt="NA">&nbsp;<span>{{item.chamber}}</span></td>
+                						    		<td ng-if="!legisType.senate">{{item.district == null? 'N.A': 'District'}}&nbsp;{{item.district}}</td>
+                						    		<td>{{item.state_name}}</td>
+                						    		<td><button type="button" class="btn btn-primary" ng-click="viewLegisDetails(item.bioguide_id)">View Details</button></td>
+                						  		</tr>
+                							</tbody>
+                						</table>
+                					</div>
+                				</div>
+                				<div class="content-foot">
+                					<dir-pagination-controls boundary-links="true"></dir-pagination-controls>
+                				</div>
+                			</div>
+                		</div>
+                        <div class="box" ng-if="pages.bills">
+                            <ul class="nav nav-tabs">
+                                <li class="active" ng-click="billsType.active = true" data-toggle="tab"><a href="">Active Bills</a></li>
+                                <li ng-click="billsType.new = true"><a href="" data-toggle="tab">New Bills</a></li>
+                            </ul>
+                            <div class="content">
+                                <div class="content-header">
+                                    <form class="form-inline">
+                                    <p class="col-xs-7 text-left">{{contentType.bills}}</p>
+                                        <div class="form-group pull-right col-xs-5">
+                                            <input class=" form-control" ng-model="keywords.bills" placeholder="Search">
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="content-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Bill ID</th>
+                                                    <th>Bill Type</th>
+                                                    <th class="stacked">Title</th>
+                                                    <th>Chamber</th>
+                                                    <th>Introduced On</th>
+                                                    <th>Sponsor</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="item in bills| filter: {history:{active:types.bills}}| filter:keywords.bills | orderBy: 'introduced_on':true | itemsPerPage: 10" current-page="currentPage">
+                                                    <td>{{item.bill_id}}</td>
+                                                    <td>{{item.bill_type}}</td>
+                                                    <td class="stacked">{{item.official_title}}</td>
+                                                    <td><span><img ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{item.chamber == 'house'? 'h.png': 's.svg'}}" alt="NA">&nbsp;{{item.chamber}}</span></td>
+                                                    <td>{{item.introduced_on}}</td>
+                                                    <td>{{item.sponsor.title}}.&nbsp;{{item.sponsor.last_name}},&nbsp;{{item.sponsor.first_name}}</td>
+                                                    <td><button type="button" class="btn btn-primary" ng-click="viewBillDetails(item.bill_id)">View Details</button></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="content-foot">
+                                    <dir-pagination-controls boundary-links="true"></dir-pagination-controls>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box" ng-if="pages.committees">
+                            <ul class="nav nav-tabs">
+                                <li class="active" ng-click="commitsType.house = true" data-toggle="tab"><a href="">House</a></li>
+                                <li ng-click="commitsType.senate = true" data-toggle="tab"><a href="">Senate</a></li>
+                                <li ng-click="commitsType.joint = true" data-toggle="tab"><a href="">Joint</a></li>
+                            </ul>
+                            <div class="content">
+                                <div class="content-header">
+                                    <form class="form-inline">
+                                    <p class="col-xs-7 text-left">{{contentType.committees}}</p>
+                                        <div class="form-group pull-right col-xs-5">
+                                            <input class="form-control" ng-model="keywords.committees" placeholder="Search">
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="content-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Chamber</th>
+                                                    <th>Committee ID</th>
+                                                    <th>Name</th>
+                                                    <th ng-if="commitsType.house || commitsType.senate">Parent Committee</th>
+                                                    <th ng-if="commitsType.house">Contact</th>
+                                                    <th ng-if="commitsType.house">Office</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="item in committees| filter: types.committees | filter:keywords.committees | orderBy: 'committee_id' | itemsPerPage: 10" current-page="currentPage">
+                                                    <td><button class="btn btn-default" ng-if="!checkInFav('commits',item.committee_id)" ng-click="addToFav('commits',item)"><i class="fa fa-star-o"></i></button><button class="btn btn-default" ng-if="checkInFav('commits',item.committee_id)" ng-click="deleteFav('commits',item.committee_id)"><i class="fa fa-star"></i></button></td>
+                                                    <td><img ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{item.chamber == 'house'? 'h.png': 's.svg'}}" style="width:20px;height:20px;" alt="NA">&nbsp;{{item.chamber}}</td>
+                                                    <td>{{item.committee_id}}</td>
+                                                    <td>{{item.name}}</td>
+                                                    <td ng-if="commitsType.house || commitsType.senate">{{item.parent_committee_id}}</td>
+                                                    <td ng-if="commitsType.house">{{item.phone}}</td>
+                                                    <td ng-if="commitsType.house">{{item.office == null ? 'N.A' : item.office}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="content-foot">
+                                    <dir-pagination-controls boundary-links="true"></dir-pagination-controls>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box" ng-if="pages.favorites">
+                            <ul class="nav nav-tabs">
+                                <li class="active" ng-click="favsType.legislators = true" data-toggle="tab"><a href="">Legislators</a></li>
+                                <li ng-click="favsType.bills = true" data-toggle="tab"><a href="">Bills</a></li>
+                                <li ng-click="favsType.committees = true" data-toggle="tab"><a href="">Committees</a></li>
+                            </ul>
+                            <div class="content">
+                                <div class="content-header">
+                                    <p class="text-left" for="content-header">{{contentType.favorites}}</p>
+                                </div>
+                                <div class="content-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover" ng-if="favsType.legislators">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Image</th>
+                                                    <th>Party</th>
+                                                    <th>Name</th>
+                                                    <th>Chamber</th>
+                                                    <th>State</th>
+                                                    <th>Email</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="item in favorites.legislators | itemsPerPage: all" current-page="currentPage">
+                                                    <td><button class="btn btn-default" ng-click="deleteFav('legis',item.bioguide_id)"><i class="fa fa-trash-o"></i></button></td>
+                                                    <td><img ng-src="https://theunitedstates.io/images/congress/225x275/{{item.bioguide_id}}.jpg" alt="NA"></td>
+                                                    <td><img ng-src="{{item.party=='R'? 'http://cs-server.usc.edu:45678/hw/hw8/images/r.png':(item.party=='D'? 'http://cs-server.usc.edu:45678/hw/hw8/images/d.png' : 'http://independentamericanparty.org/wp-content/themes/v/images/logo-american-heritage-academy.png')}}" alt="NA"></td>
+                                                    <td>{{item.last_name}},&nbsp;{{item.first_name}}</td>
+                                                    <td><img ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{item.chamber == 'house'? 'h.png': 's.svg'}}" alt="NA">&nbsp;{{item.chamber}}</td>
+                                                    <td>{{item.state_name}}</td>
+                                                    <td><a ng-href="mailto:{{item.oc_email}}">{{item.oc_email}}</a></td>
+                                                    <td><button type="button" class="btn btn-primary" ng-click="viewLegisDetails(item.bioguide_id)">View Details</button></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <table class="table table-hover" ng-if="favsType.bills">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Bill ID</th>
+                                                    <th>Bill Type</th>
+                                                    <th>Title</th>
+                                                    <th>Chamber</th>
+                                                    <th>Introduced On</th>
+                                                    <th>Sponsor</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="item in favorites.bills | itemsPerPage: all" current-page="currentPage">
+                                                    <td><button class="btn btn-default" ng-click="deleteFav('bills',item.bill_id)"><i class="fa fa-trash-o"></i></button></td>
+                                                    <td>{{item.bill_id}}</td>
+                                                    <td>{{item.bill_type}}</td>
+                                                    <td>{{item.official_title}}</td>
+                                                    <td><img ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{item.chamber == 'house'? 'h.png': 's.svg'}}" style="width:20px;height:20px;" alt="NA">&nbsp;{{item.chamber}}</td>
+                                                    <td>{{item.introduced_on}}</td>
+                                                    <td>{{item.sponsor.title}}.&nbsp;{{item.sponsor.last_name}},&nbsp;{{item.sponsor.first_name}}</td>
+                                                    <td><button type="button" class="btn btn-primary" ng-click="viewBillDetails(item.bill_id)">View Details</button></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <table class="table table-hover" ng-if="favsType.committees">
+                                            <thead>
+                                                <tr>
+                                                    <th></th>
+                                                    <th>Chamber</th>
+                                                    <th>Committee ID</th>
+                                                    <th>Name</th>
+                                                    <th>Parent Committee</th>
+                                                    <th>Sub Committee</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="item in favorites.committees | itemsPerPage: all" current-page="currentPage">
+                                                    <td><button class="btn btn-default" ng-click="deleteFav('commits',item.committee_id)"><i class="fa fa-trash-o"></i></button></td>
+                                                    <td><img ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/{{item.chamber == 'house'? 'h.png': 's.svg'}}" style="width:20px;height:20px;" alt="NA">&nbsp;{{item.chamber}}</td>
+                                                    <td>{{item.committee_id}}</td>
+                                                    <td>{{item.name}}</td>
+                                                    <td>{{item.parent_committee_id}}</td>
+                                                    <td>{{item.subcommittee}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+<!--                                 <div class="content-foot">
+                                    <dir-pagination-controls boundary-links="true"></dir-pagination-controls>
+                                </div> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item"> 
+                        <div class="card" ng-if="pages.legislators || (pages.favorites && favsType.legislators)">
+                            <div class="card-header">
+                                <div class="controls left carousel-control">
+                                    <button class="btn btn-default" href="#myCarousel"  data-slide="prev">
+                                        <i class="fa fa-chevron-left fa-lg"></i>
+                                    </button>
+                                </div>
+                                <h4>Details</h4>
+                                <button class="pull-right btn btn-default" ng-if="!checkInFav('legis',details.legislators.personal_info.bioguide_id)" ng-click="addToFav('legis',details.legislators.personal_info)"><i class="fa fa-star-o"></i></button>
+                                <button class="pull-right btn btn-default" ng-if="checkInFav('legis',details.legislators.personal_info.bioguide_id)" ng-click="deleteFav('legis',details.legislators.personal_info.bioguide_id)"><i class="fa fa-star"></i></button>
+                            </div>
+                            <hr>
+                            <div>
+                            <div class="personal_info col-xs-12 col-md-6">
+                                <div class="table-responsive">
+                                <table class="table">
+                                    <tr>
+                                        <th rowspan="6"><img class="stacked bio_img" ng-src="https://theunitedstates.io/images/congress/225x275/{{details.legislators.personal_info.bioguide_id}}.jpg"></th>
+                                        <td><img class="single_line" ng-src="https://theunitedstates.io/images/congress/225x275/{{details.legislators.personal_info.bioguide_id}}.jpg"></td>
+                                    </tr>
+                                    <tr><td>{{details.legislators.personal_info.title}}.&nbsp;{{details.legislators.personal_info.last_name}},&nbsp;{{details.legislators.personal_info.first_name}}</td></tr>
+                                    <tr><td><a ng-href="mailto:{{details.legislators.personal_info.oc_email}}">{{details.legislators.personal_info.oc_email}}</a></td></tr>
+                                    <tr><td>Chamber:&nbsp;<span>{{details.legislators.personal_info.chamber}}</span></td></tr>
+                                    <tr><td>Contact:&nbsp;<a ng-href="tel:{{details.legislators.personal_info.phone}}">{{details.legislators.personal_info.phone}}</a></td></tr>
+                                    <tr><td class="party_img"><img ng-src="{{details.legislators.party=='R'? 'http://cs-server.usc.edu:45678/hw/hw8/images/r.png':(details.legislators.personal_info.party=='D'? 'http://cs-server.usc.edu:45678/hw/hw8/images/d.png' : 'http://independentamericanparty.org/wp-content/themes/v/images/logo-american-heritage-academy.png')}}">&nbsp;{{details.legislators.party=="R"? "Republican":(details.legislators.personal_info.party=="D"? "Democrat" : "Independent")}}</td></tr>
+                                    <tr><th>Start Term</th><td>{{details.legislators.personal_info.term_start | date:'mediumDate'}}</td></tr>
+                                    <tr><th>End Term</th><td>{{details.legislators.personal_info.term_end | date:'mediumDate'}}</td></tr>
+                                    <tr><th>Term</th><td class="stacked">
+                                        <div class="progress">
+                                            <div class="progress progress-bar-success" role="progressbar" ng-attr-aria-valuenow="{{details.legislators.personal_info.term}}" aria-valuemin="0" aria-valuemax="100" ng-attr-style="width:{{details.legislators.personal_info.term}}%">{{details.legislators.personal_info.term}}%</div>
+                                        </div>
+                                    </td></tr>
+                                    <tr><th>Office</th><td>{{details.legislators.personal_info.office}}</td></tr>
+                                    <tr><th>State</th><td>{{details.legislators.personal_info.state_name}}</td></tr>
+                                    <tr><th>Fax</th><td><a ng-href="tel:{{details.legislators.personal_info.fax}}">{{details.legislators.personal_info.fax}}</a></td></tr>
+                                    <tr><th>Birthday</th><td>{{details.legislators.personal_info.birthday | date:'mediumDate'}}</td></tr>
+                                    <tr><th>Social Links</th><td class="social_link"><a ng-href="https://twitter.com/{{details.legislators.personal_info.twitter_id}}" target="_blank" ng-attr-style="display:{{details.legislators.personal_info.twitter_id == null? 'none': 'inline'}}"><img ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/t.png"></a>&nbsp;<a ng-href="https://www.facebook.com/{{details.legislators.personal_info.facebook_id}}" target="_blank" ng-attr-style="display:{{details.legislators.personal_info.facebook_id == null? 'none': 'inline'}}"><img ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/f.png"></a>&nbsp;<a ng-href="{{details.legislators.personal_info.website}}" target="_blank"  ng-attr-style="display:{{details.legislators.personal_info.website == null? 'none': 'inline'}}"><img ng-src="http://cs-server.usc.edu:45678/hw/hw8/images/w.png"></a></td></tr>
+                                </table>
+                                </div>
+                            </div>
+                            <div class="non_personal_info col-xs-12 col-md-6">
+                                <label>Committees</label>
+                                <div class="table-responsive">
+                                <table class="table">
+                                    <tr>
+                                        <th>Chamber</th>
+                                        <th>Committee ID</th>
+                                        <th class="stacked">Name</th>
+                                    </tr>
+                                    <tr ng-repeat="x in details.legislators.committees_info | limitTo:5">
+                                        <td style="text-transform:capitalize;">{{ x.chamber }}</td>
+                                        <td>{{ x.committee_id }}</td>
+                                        <td class="stacked">{{ x.name }}</td>
+                                    </tr>
+                                </table>
+                                </div>
+                                <label>Bills</label>
+                                <div class="table-responsive">
+                                <table class="table">
+                                   <tr>
+                                        <th>Bill ID</th>
+                                        <th class="stacked">Title</th>
+                                        <th class="stacked">Chamber</th>
+                                        <th class="stacked">Bill Type</th>
+                                        <th class="stacked">Congress</th>
+                                        <th>Link</th>
+                                    </tr>
+                                    <tr ng-repeat="x in details.legislators.bills_info | limitTo:5">
+                                        <td>{{ x.bill_id }}</td>
+                                        <td class="stacked">{{ x.official_title }}</td>
+                                        <td class="stacked">{{ x.chamber }}</td>
+                                        <td class="stacked">{{ x.bill_type }}</td>
+                                        <td class="stacked">{{ x.congress }}</td>
+                                        <td><a ng-href="{{ x.last_version.urls.pdf }}" target="_blank">Link</a></td>
+                                    </tr>
+                                </table>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        <div class="card" ng-if="pages.bills || (pages.favorites && favsType.bills)">
+                            <div class="card-header">
+                                <div class="controls left carousel-control">
+                                    <button class="btn btn-default" href="#myCarousel"  data-slide="prev">
+                                        <i class="fa fa-chevron-left fa-lg"></i>
+                                    </button>
+                                </div>
+                                <h4>Details</h4>
+                                <button class="pull-right btn btn-default" ng-if="!checkInFav('bills',details.bills.bill_id)" ng-click="addToFav('bills',details.bills)"><i class="fa fa-star-o"></i></button>
+                                <button class="pull-right btn btn-default" ng-if="checkInFav('bills',details.bills.bill_id)" ng-click="deleteFav('bills',details.bills.bill_id)"><i class="fa fa-star"></i></button>
+                            </div>
+                            <hr>
+                            <div class="col-xs-12 col-md-6">
+                                <div class="table-responsive">
+                                <table class="table">
+                                    <tr>
+                                        <th>Bill ID</th>
+                                        <td>{{details.bills.bill_id}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="stacked">Title</th>
+                                        <td class="stacked">{{details.bills.official_title}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Bill Type</th>
+                                        <td>{{details.bills.bill_type}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Sponsor</th>
+                                        <td>{{details.bills.sponsor.title}}.&nbsp;{{details.bills.sponsor.last_name}},&nbsp;{{details.bills.sponsor.first_name}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Chamber</th>
+                                        <td style="text-transform:capitalize;">{{details.bills.chamber}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Status</th>
+                                        <td>{{details.bills.history.active == true? "Active" : "New"}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Introduced On</th>
+                                        <td>{{details.bills.introduced_on | date:'mediumDate'}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Congress URL</th>
+                                        <td><a ng-href="{{details.bills.urls.congress}}" target="_blank">URL</a></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Version Status</th>
+                                        <td>{{details.bills.last_version.version_name}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Bill URL</th>
+                                        <td><a ng-href="{{details.bills.last_version.urls.pdf}}" target="_blank">Link</a></td>
+                                    </tr>
+                                </table>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-md-6">
+                                <object width="100%" height="600px" ng-attr-data="{{details.bills.last_version.urls.pdf}}" type="application/pdf"></object>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+    	</div>
+    </div>
+</div>
+<script>
+$(document).ready(function(){
+    $("#sidebar-toggle").click(function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+});
+
+
+var app = angular.module('myTable', ['angularUtils.directives.dirPagination']);
+app.controller("tableController", function($scope, $http) {
+	$scope.states = {
+	"selectedState": "",
+    "availableStates": [
+    {
+        "name": "Alabama",
+        "abbreviation": "AL"
+    },
+    {
+        "name": "Alaska",
+        "abbreviation": "AK"
+    },
+    {
+        "name": "American Samoa",
+        "abbreviation": "AS"
+    },
+    {
+        "name": "Arizona",
+        "abbreviation": "AZ"
+    },
+    {
+        "name": "Arkansas",
+        "abbreviation": "AR"
+    },
+    {
+        "name": "California",
+        "abbreviation": "CA"
+    },
+    {
+        "name": "Colorado",
+        "abbreviation": "CO"
+    },
+    {
+        "name": "Connecticut",
+        "abbreviation": "CT"
+    },
+    {
+        "name": "Delaware",
+        "abbreviation": "DE"
+    },
+    {
+        "name": "District Of Columbia",
+        "abbreviation": "DC"
+    },
+    {
+        "name": "Federated States Of Micronesia",
+        "abbreviation": "FM"
+    },
+    {
+        "name": "Florida",
+        "abbreviation": "FL"
+    },
+    {
+        "name": "Georgia",
+        "abbreviation": "GA"
+    },
+    {
+        "name": "Guam",
+        "abbreviation": "GU"
+    },
+    {
+        "name": "Hawaii",
+        "abbreviation": "HI"
+    },
+    {
+        "name": "Idaho",
+        "abbreviation": "ID"
+    },
+    {
+        "name": "Illinois",
+        "abbreviation": "IL"
+    },
+    {
+        "name": "Indiana",
+        "abbreviation": "IN"
+    },
+    {
+        "name": "Iowa",
+        "abbreviation": "IA"
+    },
+    {
+        "name": "Kansas",
+        "abbreviation": "KS"
+    },
+    {
+        "name": "Kentucky",
+        "abbreviation": "KY"
+    },
+    {
+        "name": "Louisiana",
+        "abbreviation": "LA"
+    },
+    {
+        "name": "Maine",
+        "abbreviation": "ME"
+    },
+    {
+        "name": "Marshall Islands",
+        "abbreviation": "MH"
+    },
+    {
+        "name": "Maryland",
+        "abbreviation": "MD"
+    },
+    {
+        "name": "Massachusetts",
+        "abbreviation": "MA"
+    },
+    {
+        "name": "Michigan",
+        "abbreviation": "MI"
+    },
+    {
+        "name": "Minnesota",
+        "abbreviation": "MN"
+    },
+    {
+        "name": "Mississippi",
+        "abbreviation": "MS"
+    },
+    {
+        "name": "Missouri",
+        "abbreviation": "MO"
+    },
+    {
+        "name": "Montana",
+        "abbreviation": "MT"
+    },
+    {
+        "name": "Nebraska",
+        "abbreviation": "NE"
+    },
+    {
+        "name": "Nevada",
+        "abbreviation": "NV"
+    },
+    {
+        "name": "New Hampshire",
+        "abbreviation": "NH"
+    },
+    {
+        "name": "New Jersey",
+        "abbreviation": "NJ"
+    },
+    {
+        "name": "New Mexico",
+        "abbreviation": "NM"
+    },
+    {
+        "name": "New York",
+        "abbreviation": "NY"
+    },
+    {
+        "name": "North Carolina",
+        "abbreviation": "NC"
+    },
+    {
+        "name": "North Dakota",
+        "abbreviation": "ND"
+    },
+    {
+        "name": "Northern Mariana Islands",
+        "abbreviation": "MP"
+    },
+    {
+        "name": "Ohio",
+        "abbreviation": "OH"
+    },
+    {
+        "name": "Oklahoma",
+        "abbreviation": "OK"
+    },
+    {
+        "name": "Oregon",
+        "abbreviation": "OR"
+    },
+    {
+        "name": "Palau",
+        "abbreviation": "PW"
+    },
+    {
+        "name": "Pennsylvania",
+        "abbreviation": "PA"
+    },
+    {
+        "name": "Puerto Rico",
+        "abbreviation": "PR"
+    },
+    {
+        "name": "Rhode Island",
+        "abbreviation": "RI"
+    },
+    {
+        "name": "South Carolina",
+        "abbreviation": "SC"
+    },
+    {
+        "name": "South Dakota",
+        "abbreviation": "SD"
+    },
+    {
+        "name": "Tennessee",
+        "abbreviation": "TN"
+    },
+    {
+        "name": "Texas",
+        "abbreviation": "TX"
+    },
+    {
+        "name": "Utah",
+        "abbreviation": "UT"
+    },
+    {
+        "name": "Vermont",
+        "abbreviation": "VT"
+    },
+    {
+        "name": "Virgin Islands",
+        "abbreviation": "VI"
+    },
+    {
+        "name": "Virginia",
+        "abbreviation": "VA"
+    },
+    {
+        "name": "Washington",
+        "abbreviation": "WA"
+    },
+    {
+        "name": "West Virginia",
+        "abbreviation": "WV"
+    },
+    {
+        "name": "Wisconsin",
+        "abbreviation": "WI"
+    },
+    {
+        "name": "Wyoming",
+        "abbreviation": "WY"
+    }]
+    };
+    $scope.details = {
+        "legislators": {
+            "personal_info":null,
+            "committees_info": null,
+            "bills_info": null
+        },
+        "bills": null,
+        "committees": null,
+        "favorites": null
+    };
+    $scope.favorites = {
+        "legislators": JSON.parse(localStorage.getItem("fav_legislators")),
+        "bills": JSON.parse(localStorage.getItem("fav_bills")),
+        "committees": JSON.parse(localStorage.getItem("fav_committees"))
+    };
+    $scope.legisType = {
+        "state": true,
+        "house": false,
+        "senate": false
+    };
+    $scope.billsType = {
+        "active": true,
+        "new": false
+    };
+    $scope.commitsType = {
+        "house": true,
+        "senate": false,
+        "joint": false
+    };
+    $scope.favsType = {
+        "legislators": true,
+        "bills": false,
+        "committees": false
+    };
+    $scope.pages = {
+    	"legislators": true,
+    	"bills": false,
+    	"committees": false,
+    	"favorites": false
+    };
+    $scope.keywords = {
+        "legislators": "",
+        "bills": "",
+        "committees": ""
+    };
+    $scope.types = {
+        "legislators": "",
+        "bills": "hr",
+        "committees": ""
+    };
+    $scope.sorts = {
+        "legislators": "",
+        "bills": "bill_id",
+        "committees": ""
+    };
+    $scope.contentType = {
+        "legislators": "Legislators By State",
+        "bills": "Active Bills",
+        "committees": "House",
+        "favorites": "Favorite Legislators"
+    };
+    $scope.pageHeader = "Legislators";
+    //$scope.contentHeader = "Legislators By State";
+    $scope.currentPage = 1;
+    $scope.type = "";
+    $scope.keyword = "";
+    $scope.sort = "state_name";
+    // $scope.favorites.legislators = JSON.parse(localStorage.getItem("fav_legislators"));
+    
+    $http({
+        method : "GET",
+        url : "Controller.php?action=loadAllLegislators"
+    }).then(function mySucces(response) {
+        $scope.response = response.data;
+        $scope.legislators = response.data.results;
+    }, function myError(response) {
+        console.log(response.statusText);
+    });
+    $http({
+        method : "GET",
+        url : "Controller.php?action=loadAllBills"
+    }).then(function mySucces(response) {
+    	// console.log(response);
+        $scope.response = response.data;
+        $scope.bills = response.data;
+        // $scope.bills = response.data.results;
+    }, function myError(response) {
+        console.log(response.statusText);
+    });
+    $http({
+        method : "GET",
+        url : "Controller.php?action=loadAllCommittees"
+    }).then(function mySucces(response) {
+    	// console.log(response.data.results);
+        $scope.response = response.data;
+        $scope.committees = response.data.results;
+    }, function myError(response) {
+        console.log(response.statusText);
+    });
+
+    //table display control
+	$scope.$watch("pages.legislators", function(newValue) {
+		if(newValue == true){
+			$scope.pages.bills = false;
+			$scope.pages.committees = false;
+			$scope.pages.favorites = false;
+            $scope.pageHeader = "Legislators";
+            $scope.legisType.state = true;
+		}
+	});
+	$scope.$watch("pages.bills", function(newValue) {
+		if(newValue == true){
+			$scope.pages.legislators = false;
+			$scope.pages.committees = false;
+			$scope.pages.favorites = false;
+            $scope.pageHeader = "Bills";
+            $scope.billsType.active = true;
+		}
+	});
+	$scope.$watch("pages.committees", function(newValue) {
+		if(newValue == true){
+			$scope.pages.bills = false;
+			$scope.pages.legislators = false;
+			$scope.pages.favorites = false;
+            $scope.pageHeader = "Committees";
+            $scope.commitsType.house = true;
+		}
+	});
+	$scope.$watch("pages.favorites", function(newValue) {
+		if(newValue == true){
+			$scope.pages.bills = false;
+			$scope.pages.legislators = false;
+			$scope.pages.committees = false;
+            $scope.pageHeader = "Favorites";
+            $scope.favsType.legislators = true;
+		}
+	});
+    $scope.$watch("pages", function(newValue) {
+        $("#myCarousel").carousel(0);
+    },true);
+
+    //legislator display controller
+    $scope.$watch("legisType", function(newValue) {
+        $scope.keywords.legislators = "";
+        // console.log(newValue);
+    },true);
+    $scope.$watch("legisType.state", function(newValue) {
+        if(newValue == true){
+            $scope.legisType.senate = false;
+            $scope.legisType.house = false;
+            $scope.contentType.legislators="Legislators By State";
+            $scope.types.legislators = "";
+            $scope.sorts.legislators = "[state_name,last_name]";
+        }
+    });
+    $scope.$watch("legisType.house", function(newValue) {
+        if(newValue == true){
+            $scope.legisType.senate = false;
+            $scope.legisType.state = false;
+            $scope.contentType.legislators = "Legislators By House";
+            $scope.types.legislators = "house";
+            $scope.sorts.legislators = "last_name";
+        }
+    });
+    $scope.$watch("legisType.senate", function(newValue) {
+        if(newValue == true){
+            $scope.legisType.state = false;
+            $scope.legisType.house = false;
+            $scope.contentType.legislators = "Legislators By Senate";
+            $scope.types.legislators = "senate";
+            $scope.sorts.legislators = "last_name";
+        }
+    });
+    //bills display controller
+    $scope.$watch("billsType", function(newValue) {
+        $scope.keywords.bills = "";
+        // console.log(newValue);
+    },true);
+    $scope.$watch("billsType.active", function(newValue) {
+        if(newValue == true){
+            $scope.billsType.new = false;
+            $scope.types.bills = true;
+            // $scope.sorts.bills = "introduced_on";
+            $scope.contentType.bills = "Active Bills";
+        }
+    });
+    $scope.$watch("billsType.new", function(newValue) {
+        if(newValue == true){
+            $scope.billsType.active = false;
+            $scope.types.bills = false;
+            $scope.contentType.bills = "New Bills";
+        }
+    });
+
+    //committees display controller
+    $scope.$watch("commitsType", function(newValue) {
+        $scope.keywords.committees = "";
+        // console.log(newValue);
+    },true);
+    $scope.$watch("commitsType.house", function(newValue) {
+        if(newValue == true){
+            $scope.commitsType.senate = false;
+            $scope.commitsType.joint = false;
+            $scope.types.committees = "house";
+            $scope.contentType.committees = "House";
+        }
+    });
+    $scope.$watch("commitsType.senate", function(newValue) {
+        if(newValue == true){
+            $scope.commitsType.house = false;
+            $scope.commitsType.joint = false;
+            $scope.types.committees = "senate";
+            $scope.contentType.committees = "Senate";
+        }
+    });
+    $scope.$watch("commitsType.joint", function(newValue) {
+        if(newValue == true){
+            $scope.commitsType.senate = false;
+            $scope.commitsType.house = false;
+            $scope.types.committees = "joint";
+            $scope.contentType.committees = "Joint";
+        }
+    });
+
+    //favorites display controller
+    // $scope.$watch("favsType", function(newValue) {
+    //     //console.log(newValue);
+    // },true);
+    $scope.$watch("favsType.legislators", function(newValue) {
+        if(newValue == true){
+            $scope.favsType.bills = false;
+            $scope.favsType.committees = false;
+            $scope.contentType.favorites = "Favorite Legislators";
+        }
+    });
+    $scope.$watch("favsType.bills", function(newValue) {
+        if(newValue == true){
+            $scope.favsType.legislators = false;
+            $scope.favsType.committees = false;
+            $scope.contentType.favorites = "Favorite Bills";
+        }
+    });
+    $scope.$watch("favsType.committees", function(newValue) {
+        if(newValue == true){
+            $scope.favsType.bills = false;
+            $scope.favsType.legislators = false;
+            $scope.contentType.favorites = "Favorite Committees";
+        }
+    });
+    // $scope.$watchGroup(["type","keyword","sort"], function(newValue) {
+    //     // console.log(newValue);
+    // });
+    // $scope.$watch("favorites", function(newValue) {
+    //     // console.log($scope.favorites);
+    // },true);
+
+
+    $scope.viewLegisDetails = function(bioguide_id){
+        $("#myCarousel").carousel(1);
+        console.log(bioguide_id);
+        $http({
+            method : "GET",
+            url : "Controller.php?action=loadLegisDetails&bioguide_id=" + bioguide_id
+        }).then(function mySucces(response) {
+            $scope.details.legislators.personal_info = response.data.personal_info.results[0];
+            $scope.details.legislators.committees_info = response.data.committees_info.results;
+            $scope.details.legislators.bills_info = response.data.bills_info.results;
+            //manipulate 'term'
+            var current_date = new Date().getTime();
+            var start_date = new Date($scope.details.legislators.personal_info.term_start).getTime();
+            var end_date = new Date($scope.details.legislators.personal_info.term_end).getTime();
+            var progress = Math.round((current_date - start_date) / (end_date - start_date) * 100);
+            $scope.details.legislators.personal_info.term = progress;
+            // console.log($scope.details.legislators.personal_info.term);
+            console.log(response);
+        }, function myError(response) {
+            console.log(response.statusText);
+        });
+    };
+
+    $scope.viewBillDetails = function(bill_id){
+        $("#myCarousel").carousel(1);
+        console.log(bill_id);
+        $http({
+            method : "GET",
+            url : "Controller.php?action=loadBillDetails&bill_id=" + bill_id
+        }).then(function mySucces(response) {
+            $scope.details.bills = response.data.results[0];
+            console.log(response);
+        }, function myError(response) {
+            console.log(response.statusText);
+        });
+    };
+
+    $scope.addToFav = function(type,obj){
+        var str,id,key;
+        switch(type){
+            case "legis":
+                    if($scope.favorites.legislators == null)
+                        $scope.favorites.legislators = {};
+                    id = obj.bioguide_id;
+                    $scope.favorites.legislators[id] = obj;
+                    str = JSON.stringify($scope.favorites.legislators);
+                    key = "fav_legislators";
+                break;
+            case "bills":
+                    if($scope.favorites.bills == null)
+                        $scope.favorites.bills = {};
+                    id = obj.bill_id;
+                    $scope.favorites.bills[id] = obj;
+                    str = JSON.stringify($scope.favorites.bills);
+                    key = "fav_bills";
+                break;
+            case "commits":
+                    if($scope.favorites.committees == null)
+                        $scope.favorites.committees = {};
+                    id = obj.committee_id;
+                    $scope.favorites.committees[id] = obj;
+                    str = JSON.stringify($scope.favorites.committees);
+                    key = "fav_committees";
+                break;
+            default:
+                return;
+        }
+        localStorage.setItem(key, str);
+        // console.log(JSON.parse(localStorage.getItem(key)));  
+    };
+    $scope.deleteFav = function(type,id){
+        var str,key;
+        switch(type){
+            case "legis":
+                delete $scope.favorites.legislators[id];
+                str = JSON.stringify($scope.favorites.legislators);
+                key = "fav_legislators";
+                break;
+            case "bills":
+                delete $scope.favorites.bills[id];
+                str = JSON.stringify($scope.favorites.bills);
+                key = "fav_bills";
+                break;
+            case "commits":
+                delete $scope.favorites.committees[id];
+                str = JSON.stringify($scope.favorites.committees);
+                key = "fav_committees";
+                break;
+            default:
+                return;
+        }
+        localStorage.setItem(key, str);
+        // console.log(JSON.parse(localStorage.getItem(key)));
+    };
+    $scope.checkInFav = function(type,id){
+        var str = null;
+        switch(type){
+            case "legis":
+                if($scope.favorites.legislators != null)
+                    str = $scope.favorites.legislators[id];
+                break;
+            case "bills":
+                if($scope.favorites.bills != null)
+                    str = $scope.favorites.bills[id];
+                break;
+            case "commits":
+                if($scope.favorites.committees != null)
+                    str = $scope.favorites.committees[id];
+                break;
+            default:
+                return;
+        }
+        // console.log(str);
+        if(str == null)
+            return false;
+        else
+            return true;
+    };
+});
+
+</script>
+<noscript>
+</body>
+</html>
