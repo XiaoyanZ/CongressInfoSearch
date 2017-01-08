@@ -1,6 +1,8 @@
 <?php
 header("charset=utf-8");
-define("APIKEY", "9ef94b507eb64cc2aaad569ae26c60bc",true);
+define("APIKEY", _YOURAPIKEY,true);
+define("APIURL", _APIURL,true);
+//define valid actions
 $valid_action = array(
 	"loadAllLegislators",
 	"loadAllBills",
@@ -26,82 +28,76 @@ if(!in_array($action, $valid_action)){
 	die("invalid action");
 }
 $json = null;
-//handlers correspond to different actions
+
+//corresponding handlers to different actions
 if($action == $valid_action[0]){
     if(isset($_GET["state_name"])){
-        $url = "http://104.198.0.197:8080/legislators?per_page=all&state_name=".$_GET["state_name"]."&apikey=".APIKEY;
+        $url = APIURL."/legislators?per_page=all&state_name=".$_GET["state_name"]."&apikey=".APIKEY;
     }else{
-        $url = "http://104.198.0.197:8080/legislators?per_page=all&apikey=".APIKEY;
+        $url = APIURL."/legislators?per_page=all&apikey=".APIKEY;
     }
 	$json = getData($url);
 }
 else if($action == $valid_action[1]){
-	// $url = "http://congress.api.sunlightfoundation.com/bills?per_page=20&apikey=".APIKEY;
-	// 	$json = getData($url);
-	$url = "http://104.198.0.197:8080/bills?per_page=50&history.active=true&last_version.urls.pdf__exists=true&apikey=".APIKEY;
+	$url = APIURL."/bills?per_page=50&history.active=true&last_version.urls.pdf__exists=true&apikey=".APIKEY;
 	$json1 = getData($url);
-	$url = "http://104.198.0.197:8080/bills?per_page=50&history.active=false&last_version.urls.pdf__exists=true&apikey=".APIKEY;
+	$url = APIURL."/bills?per_page=50&history.active=false&last_version.urls.pdf__exists=true&apikey=".APIKEY;
 	$json2 = getData($url);
 	$json = json_encode(array_merge(json_decode($json1,true)["results"],json_decode($json2,true)["results"]));
 
 }
 else if($action == $valid_action[2]){
-	// $url = "http://congress.api.sunlightfoundation.com/committees?per_page=all&apikey=".APIKEY;
-	$url = "http://104.198.0.197:8080/committees?per_page=all&apikey=".APIKEY;
+	$url = APIURL."/committees?per_page=all&apikey=".APIKEY;
 	$json = getData($url);
 }
 else if($action == $valid_action[3]){
 	if(isset($_GET["bioguide_id"])){
-		// $url = "http://congress.api.sunlightfoundation.com/legislators?bioguide_id=".$_GET["bioguide_id"]."&apikey=".APIKEY;
-		$url = "http://104.198.0.197:8080/legislators?bioguide_id=".$_GET["bioguide_id"]."&apikey=".APIKEY;
+		$url = APIURL."/legislators?bioguide_id=".$_GET["bioguide_id"]."&apikey=".APIKEY;
 		$personal_info = getData($url);
-		// $url = "http://congress.api.sunlightfoundation.com/committees?member_ids=".$_GET["bioguide_id"]."&apikey=".APIKEY;
-		$url = "http://104.198.0.197:8080/committees?member_ids=".$_GET["bioguide_id"]."&apikey=".APIKEY;
+		$url = APIURL."/committees?member_ids=".$_GET["bioguide_id"]."&apikey=".APIKEY;
 		$committee_info = getData($url);
-		// $url = "http://congress.api.sunlightfoundation.com/bills?sponsor_id=".$_GET["bioguide_id"]."&apikey=".APIKEY;
-		$url = "http://104.198.0.197:8080/bills?sponsor_id=".$_GET["bioguide_id"]."&apikey=".APIKEY;
+		$url = APIURL."/bills?sponsor_id=".$_GET["bioguide_id"]."&apikey=".APIKEY;
 		$bill_info = getData($url);
 		$json = json_encode(array("personal_info" => json_decode($personal_info), "committees_info" => json_decode($committee_info), "bills_info" => json_decode($bill_info)));
 	}
 }
 else if($action == $valid_action[4]){
 	if(isset($_GET["bill_id"])){
-		// $url = "http://congress.api.sunlightfoundation.com/bills?bill_id=".$_GET["bill_id"]."&apikey=".APIKEY;
-		$url = "http://104.198.0.197:8080/bills?bill_id=".$_GET["bill_id"]."&apikey=".APIKEY;
+		$url = APIURL."/bills?bill_id=".$_GET["bill_id"]."&apikey=".APIKEY;
 		$json = getData($url);
 	}
 }
 else if($action == $valid_action[5]){
-	$url = "http://104.198.0.197:8080/legislators?per_page=all&chamber=house&apikey=".APIKEY;
+	$url = APIURL."/legislators?per_page=all&chamber=house&apikey=".APIKEY;
 	$json = getData($url);
 }
 else if($action == $valid_action[6]){
-	$url = "http://104.198.0.197:8080/legislators?per_page=all&chamber=senate&apikey=".APIKEY;
+	$url = APIURL."/legislators?per_page=all&chamber=senate&apikey=".APIKEY;
 	$json = getData($url);
 }
 else if($action == $valid_action[7]){
-	$url = "http://104.198.0.197:8080/bills?per_page=50&history.active=true&last_version.urls.pdf__exists=true&apikey=".APIKEY;
+	$url = APIURL."/bills?per_page=50&history.active=true&last_version.urls.pdf__exists=true&apikey=".APIKEY;
 	$json = getData($url);
 }
 else if($action == $valid_action[8]){
-	$url = "http://104.198.0.197:8080/bills?per_page=50&history.active=false&last_version.urls.pdf__exists=true&apikey=".APIKEY;
+	$url = APIURL."/bills?per_page=50&history.active=false&last_version.urls.pdf__exists=true&apikey=".APIKEY;
 	$json = getData($url);
 }
 else if($action == $valid_action[9]){
-	$url = "http://104.198.0.197:8080/committees?per_page=all&chamber=house&apikey=".APIKEY;
+	$url = APIURL."/committees?per_page=all&chamber=house&apikey=".APIKEY;
 	$json = getData($url);
 }
 else if($action == $valid_action[10]){
-	$url = "http://104.198.0.197:8080/committees?per_page=all&chamber=senate&apikey=".APIKEY;
+	$url = APIURL."/committees?per_page=all&chamber=senate&apikey=".APIKEY;
 	$json = getData($url);
 }
 else if($action == $valid_action[11]){
-	$url = "http://104.198.0.197:8080/committees?per_page=all&chamber=joint&apikey=".APIKEY;
+	$url = APIURL."/committees?per_page=all&chamber=joint&apikey=".APIKEY;
 	$json = getData($url);
 }
 else if($action == $valid_action[12]){
 	if(isset($_GET["committee_id"])){
-		$url = "http://104.198.0.197:8080/committees?committee_id=".$_GET["committee_id"]."&apikey=".APIKEY;
+		$url = APIURL."/committees?committee_id=".$_GET["committee_id"]."&apikey=".APIKEY;
 		$json = getData($url);
 	}
 }
