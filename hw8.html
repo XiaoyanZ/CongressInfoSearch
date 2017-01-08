@@ -739,12 +739,10 @@ app.controller("tableController", function($scope, $http) {
         "favorites": "Favorite Legislators"
     };
     $scope.pageHeader = "Legislators";
-    //$scope.contentHeader = "Legislators By State";
     $scope.currentPage = 1;
     $scope.type = "";
     $scope.keyword = "";
     $scope.sort = "state_name";
-    // $scope.favorites.legislators = JSON.parse(localStorage.getItem("fav_legislators"));
     
     $http({
         method : "GET",
@@ -759,10 +757,8 @@ app.controller("tableController", function($scope, $http) {
         method : "GET",
         url : "Controller.php?action=loadAllBills"
     }).then(function mySucces(response) {
-    	// console.log(response);
         $scope.response = response.data;
         $scope.bills = response.data;
-        // $scope.bills = response.data.results;
     }, function myError(response) {
         console.log(response.statusText);
     });
@@ -770,7 +766,6 @@ app.controller("tableController", function($scope, $http) {
         method : "GET",
         url : "Controller.php?action=loadAllCommittees"
     }).then(function mySucces(response) {
-    	// console.log(response.data.results);
         $scope.response = response.data;
         $scope.committees = response.data.results;
     }, function myError(response) {
@@ -821,7 +816,6 @@ app.controller("tableController", function($scope, $http) {
     //legislator display controller
     $scope.$watch("legisType", function(newValue) {
         $scope.keywords.legislators = "";
-        // console.log(newValue);
     },true);
     $scope.$watch("legisType.state", function(newValue) {
         if(newValue == true){
@@ -853,13 +847,11 @@ app.controller("tableController", function($scope, $http) {
     //bills display controller
     $scope.$watch("billsType", function(newValue) {
         $scope.keywords.bills = "";
-        // console.log(newValue);
     },true);
     $scope.$watch("billsType.active", function(newValue) {
         if(newValue == true){
             $scope.billsType.new = false;
             $scope.types.bills = true;
-            // $scope.sorts.bills = "introduced_on";
             $scope.contentType.bills = "Active Bills";
         }
     });
@@ -874,7 +866,6 @@ app.controller("tableController", function($scope, $http) {
     //committees display controller
     $scope.$watch("commitsType", function(newValue) {
         $scope.keywords.committees = "";
-        // console.log(newValue);
     },true);
     $scope.$watch("commitsType.house", function(newValue) {
         if(newValue == true){
@@ -901,10 +892,6 @@ app.controller("tableController", function($scope, $http) {
         }
     });
 
-    //favorites display controller
-    // $scope.$watch("favsType", function(newValue) {
-    //     //console.log(newValue);
-    // },true);
     $scope.$watch("favsType.legislators", function(newValue) {
         if(newValue == true){
             $scope.favsType.bills = false;
@@ -926,13 +913,6 @@ app.controller("tableController", function($scope, $http) {
             $scope.contentType.favorites = "Favorite Committees";
         }
     });
-    // $scope.$watchGroup(["type","keyword","sort"], function(newValue) {
-    //     // console.log(newValue);
-    // });
-    // $scope.$watch("favorites", function(newValue) {
-    //     // console.log($scope.favorites);
-    // },true);
-
 
     $scope.viewLegisDetails = function(bioguide_id){
         $("#myCarousel").carousel(1);
@@ -950,7 +930,6 @@ app.controller("tableController", function($scope, $http) {
             var end_date = new Date($scope.details.legislators.personal_info.term_end).getTime();
             var progress = Math.round((current_date - start_date) / (end_date - start_date) * 100);
             $scope.details.legislators.personal_info.term = progress;
-            // console.log($scope.details.legislators.personal_info.term);
             console.log(response);
         }, function myError(response) {
             console.log(response.statusText);
@@ -1002,7 +981,6 @@ app.controller("tableController", function($scope, $http) {
                 return;
         }
         localStorage.setItem(key, str);
-        // console.log(JSON.parse(localStorage.getItem(key)));  
     };
     $scope.deleteFav = function(type,id){
         var str,key;
@@ -1026,7 +1004,6 @@ app.controller("tableController", function($scope, $http) {
                 return;
         }
         localStorage.setItem(key, str);
-        // console.log(JSON.parse(localStorage.getItem(key)));
     };
     $scope.checkInFav = function(type,id){
         var str = null;
@@ -1046,7 +1023,6 @@ app.controller("tableController", function($scope, $http) {
             default:
                 return;
         }
-        // console.log(str);
         if(str == null)
             return false;
         else
