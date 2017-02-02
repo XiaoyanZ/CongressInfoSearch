@@ -1,5 +1,6 @@
 # CongressInfoSearch
 A Congress Information Search Application using Sunlight Congress API
+
 Here is a [Demo](http://www-scf.usc.edu/~zhan991/Congress/index.html)
 
 ###Features
