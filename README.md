@@ -1,6 +1,6 @@
 # CongressInfoSearch
 A Congress Information Search Application using Sunlight Congress API
-[Demo](http://www-scf.usc.edu/~zhan991/Congress/index.html)
+Here is a [Demo](http://www-scf.usc.edu/~zhan991/Congress/index.html)
 
 ###Features
 * Combined HTML5, CSS, Bootstrap, jQuery, Ajax, AngularJS and PHP
